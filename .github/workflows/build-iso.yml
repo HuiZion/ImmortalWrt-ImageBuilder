@@ -154,13 +154,13 @@ jobs:
       - name: ✅ 制作 ISO
         run: |
           firmware_file=$(ls *squashfs-combined-efi.img.gz)
+          ORIGINAL_NAME="${firmware_file%.img.gz}"
+          echo "ORIGINAL_NAME=$ORIGINAL_NAME" >> $GITHUB_ENV
           cd img-installer
           bash autobuild/autobuild.sh "../$firmware_file"
 
       - name: ✅ 重命名 ISO 文件
         run: |
-          FIRMWARE_FILE=$(ls *squashfs-combined-efi.img.gz)
-          ORIGINAL_NAME="${FIRMWARE_FILE%.img.gz}"
           mv img-installer/output/custom-installer-x86_64.iso "img-installer/output/${ORIGINAL_NAME}-installer.iso"
           echo "ISO 文件名: ${ORIGINAL_NAME}-installer.iso"
 
