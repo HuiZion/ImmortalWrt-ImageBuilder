@@ -1,4 +1,4 @@
-name: build-RaspBerryPi-24.10.x
+name: Build 24.10.x RaspBerryPi
 
 on:
   workflow_dispatch:
@@ -58,7 +58,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
 
       - name: Set executable permissions
         run: |
@@ -69,7 +69,7 @@ jobs:
           mkdir -p "${{ github.workspace }}/custom"
           echo "${{ github.event.inputs.custom_router_ip }}" > "${{ github.workspace }}/custom/custom_router_ip.txt"
           echo "您设置的路由器管理地址是:${{ github.event.inputs.custom_router_ip }}"
-      
+
       - name: Enable Store integration
         run: |
           if [ "${{ github.event.inputs.enable_store }}" == "true" ]; then
@@ -78,8 +78,8 @@ jobs:
           else
             echo "❎ 未启用 luci-app-store"
           fi
-      
-      
+
+
       - name: Build raspberrypi ImmortalWrt 24.10.x
         run: |
           luci_version="${{ github.event.inputs.luci_version }}"
@@ -105,11 +105,11 @@ jobs:
           fi
           include_docker="${{ github.event.inputs.include_docker }}"
           size="${{ github.event.inputs.size }}"
-          
+
           IFS=',' read -r -a profile_array <<< "$profiles"
           for profile in "${profile_array[@]}"; do
             echo "Building for profile: $profile"
-            
+
             docker run --rm -i \
               --user root \
               -v "${{ github.workspace }}/bin:/home/build/immortalwrt/bin" \
@@ -125,7 +125,7 @@ jobs:
               immortalwrt/imagebuilder:$tag /bin/bash /home/build/openwrt/build.sh
           done
           ls ${{ github.workspace }}/bin/targets/bcm27xx/${{ env.cpu }}
-      
+
       - name: Create info
         run: |
           if [ "${{ github.event.inputs.include_docker }}" == "yes" ]; then
@@ -134,9 +134,9 @@ jobs:
           else
             echo -e "NO docker"
           fi
- 
+
       - name: Upload ImmortalWrt as release assets
-        uses: softprops/action-gh-release@v2.2.1
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: Autobuild-raspberrypi
           body_path: ${{ github.workspace }}/info.md

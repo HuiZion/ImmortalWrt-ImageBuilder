@@ -235,7 +235,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
 
       - name: Set executable permissions
         run: chmod +x ${{ github.workspace }}/n1/build.sh
@@ -248,7 +248,7 @@ jobs:
 
       - name: Debug workspace contents
         run: ls -R
-      
+
       - name: Enable Store integration
         run: |
           if [ "${{ github.event.inputs.enable_store }}" == "true" ]; then
@@ -263,7 +263,7 @@ jobs:
         run: |
           # 使用ImageBuilder构建 且用户勾选了替换banner时
           cp n1/99-banner.sh files/etc/uci-defaults/
-      
+
       - name: Build Rootfs for Radxa and Other Boards (ImmortalWrt)
         if: ${{ github.event.inputs.skip_imagebuilder != 'true' }}
         run: |
@@ -272,12 +272,12 @@ jobs:
           include_docker="${{ github.event.inputs.include_docker }}"
           rootfs_partsize="${{ github.event.inputs.rootfs_partsize }}"
           luci_version="${{ github.event.inputs.luci_version }}"
-          
+
           IFS=',' read -r -a profile_array <<< "$profiles"
-          
+
           for profile in "${profile_array[@]}"; do
             echo "Building for profile: $profile"
-            
+
             docker run --rm -i \
               --user root \
               -v "${{ github.workspace }}/bin:/home/build/immortalwrt/bin" \
@@ -293,7 +293,7 @@ jobs:
               -e ROOTFS_PARTSIZE=$rootfs_partsize \
               immortalwrt/imagebuilder:armsr-armv8-openwrt-${luci_version} /bin/bash /home/build/immortalwrt/build.sh
           done
-          
+
       - name: Download prebuilt rootfs.tar.gz
         if: ${{ github.event.inputs.skip_imagebuilder == 'true' }}
         run: |
@@ -334,12 +334,12 @@ jobs:
           for FILE in ${{ env.PACKAGED_OUTPUTPATH }}/*.img.gz; do
             echo "Processing file: $FILE"
             FILENAME=$(basename "$FILE")
-            KERNEL_VERSION=$(echo "$FILENAME" | grep -oP 'k\d+\.\d+\.\d+') 
+            KERNEL_VERSION=$(echo "$FILENAME" | grep -oP 'k\d+\.\d+\.\d+')
             if [[ -z "$KERNEL_VERSION" ]]; then
               echo "Skipped: Could not extract kernel version from $FILENAME"
               continue
             fi
-            
+
             if [ -n "$PREBUILT_LUCI_VERSION" ]; then
               echo "PREBUILT_LUCI_VERSION is not empty: $PREBUILT_LUCI_VERSION"
               NEW_NAME="immortalwrt-${PREBUILT_LUCI_VERSION}-${MODEL}-btrfs-${KERNEL_VERSION}.img.gz"
@@ -352,7 +352,7 @@ jobs:
           done
 
       - name: Upload firmware to GitHub Releases
-        uses: softprops/action-gh-release@v2.2.1
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ophub
           name: ImmortalWrt for boxs

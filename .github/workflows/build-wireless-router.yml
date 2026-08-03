@@ -15,7 +15,7 @@
 # xiaomi_redmi-router-ax6000-stock ————原厂默认 bootloader（stock）版本
 # xiaomi_redmi-router-ax6000-ubootmod—————改装过 bootloader 的版本（ubootmod）
 
-name: Build Wireless Router ImmortalWrt 24.10.x
+name: Build 24.10.x Wireless Router
 
 on:
   workflow_dispatch:
@@ -528,12 +528,12 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
 
       - name: Set executable permissions
         run: |
           chmod +x ${{ github.workspace }}/mediatek-filogic/build24.sh
-      
+
       - name: Save Custom Router IP into OpenWrt files
         run: |
           mkdir -p "${{ github.workspace }}/custom"
@@ -550,7 +550,7 @@ jobs:
               exit 1
             fi
           fi
-      
+
       - name: Enable Store integration
         run: |
           if [ "${{ github.event.inputs.enable_store }}" == "true" ]; then
@@ -636,7 +636,7 @@ jobs:
                   fi
                   ;;
             esac
-          
+
             docker run --rm -i \
               --user root \
               -v "${{ github.workspace }}/bin:/home/build/immortalwrt/bin" \
@@ -651,7 +651,7 @@ jobs:
               -e PPPOE_ACCOUNT=${{ inputs.pppoe_account }} \
               -e PPPOE_PASSWORD=${{ inputs.pppoe_password }} \
             immortalwrt/imagebuilder:$tag /bin/bash /home/build/immortalwrt/build.sh
-          
+
 
       - name: Create info
         run: |
@@ -664,10 +664,10 @@ jobs:
           custom_router_ip="${{ github.event.inputs.custom_router_ip }}"
           extra_content_ip="#### 管理地址 $custom_router_ip"
           echo -e "\n $extra_content_ip" >> ${{ github.workspace }}/mediatek-filogic/info.md
-          
-          
+
+
       - name: Upload ImmortalWrt as release assets
-        uses: softprops/action-gh-release@v2.2.1
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ github.event.inputs.profile }}
           name: ImmortalWrt-Wireless
